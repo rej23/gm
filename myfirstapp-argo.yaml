@@ -1,0 +1,18 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: myfirstapp
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/rej23/webCICD.git
+    targetRevision: HEAD
+    path: webcicd
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: default
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
