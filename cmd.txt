@@ -1,5 +1,50 @@
 minikube start
 kubectl port-forward svc/argocd-server -n argocd 8080:80
 
+
+
+############# to apply argocd
+ kubectl apply -f myfirstapp-argo.yaml
+
 USERNAME: admin
 PASSWORD CMD: kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d; echo
+
+
+######## if ingress is not working
+minikube addons enable ingress
+
+
+######## to monitor docker image
+kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj-labs/argocd-image-updater/stable/manifests/install.yaml
+kubectl get pods -n argocd | grep image-updater
+
+
+######### add to argo.yaml
+argocd-image-updater.argoproj.io/image-list: myregistry.com/myimage:~v1.0
+
+
+########## add concourse
+helm repo add bitnami https://charts.bitnami.com/bitnami
+helm repo update
+helm install concourse bitnami/concourse
+
+
+
+############k8s dashboard
+kubectl apply -f https://raw.githubusercontent.com/kubernetes/dashboard/v2.2.0/aio/deploy/recommended.yaml
+Access the Dashboard:
+Start a kubectl proxy: kubectl proxy
+Open a web browser and navigate to: http://localhost:8001/api/v1/namespaces/kubernetes-dashboard/services/https:kubernetes-dashboard:/proxy/
+
+
+
+If the Kubernetes Dashboard is asking for a token, you need to create a service account and generate a token for authentication. Here's how to do it:
+Create a service account:
+text
+kubectl create serviceaccount dashboard-admin-sa
+Bind the service account to the cluster-admin role:
+text
+kubectl create clusterrolebinding dashboard-admin-sa --clusterrole=cluster-admin --serviceaccount=default:dashboard-admin-sa
+Get the token:
+text
+kubectl get secrets $(kubectl get serviceaccount dashboard-admin-sa -o jsonpath="{.secrets[0].name}") -o jsonpath="{.data.token}" | base64 --decode
